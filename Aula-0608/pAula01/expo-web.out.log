@@ -1,0 +1,13 @@
+
+> paula01@1.0.0 web
+> expo start --web --port 8082
+
+Starting project at C:\Users\Felipe Trindade\Documents\GitHub\Dev_Aplicacoes_Moveis\Aula-0608\pAula01
+ ERROR  An unknown error occurred while installing React Native DevTools. Details:
+
+spawn EPERM
+Starting Metro Bundler
+
+Waiting on http://localhost:8082
+
+Logs for your project will appear below.
