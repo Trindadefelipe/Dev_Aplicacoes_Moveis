@@ -1,0 +1,58 @@
+# Dependencias
+node_modules/
+.pnp/
+.pnp.js
+.yarn/cache
+.yarn/install-state.gz
+
+# Expo / React Native
+.expo/
+.expo-shared/
+dist/
+web-build/
+expo-env.d.ts
+.metro-health-check*
+
+# Builds nativos
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/.cxx/
+ios/Pods/
+ios/build/
+*.hprof
+*.keystore
+!debug.keystore
+
+# Chaves e certificados
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+*.orig.*
+
+# Variaveis de ambiente
+.env
+.env.local
+.env*.local
+
+# Logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# TypeScript
+*.tsbuildinfo
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/
+*.swp
