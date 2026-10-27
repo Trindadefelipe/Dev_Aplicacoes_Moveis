@@ -2,7 +2,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AppStack from "./src/navigation/AppStack";
 
-
 export default function App() {
   return (
     <SafeAreaProvider>
@@ -12,4 +11,3 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
-
