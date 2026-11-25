@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Revisão - Prova React Native (30/11)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0F172A;
+      --bg-secondary: #1E293B;
+      --bg-card: #1E293B;
+      --bg-card-hover: #334155;
+      --border-color: #334155;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --accent-blue: #38BDF8;
+      --accent-green: #34D399;
+      --accent-purple: #A78BFA;
+      --accent-amber: #FBBF24;
+      --accent-rose: #FB7185;
+      --code-bg: #090D16;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 290px;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #38BDF8, #6366F1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #fff;
+    }
+
+    .brand-text h2 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text p {
+      font-size: 12px;
+      color: var(--accent-blue);
+      font-weight: 600;
+    }
+
+    .overall-progress {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(15, 23, 42, 0.4);
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background-color: #334155;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38BDF8, #34D399);
+      width: 0%;
+      border-radius: 9999px;
+      transition: width 0.4s ease;
+    }
+
+    .nav-links {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item button:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .nav-item.active button {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: rgba(56, 189, 248, 0.3);
+      color: var(--accent-blue);
+    }
+
+    .day-badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #334155;
+      color: var(--text-muted);
+    }
+
+    .nav-item.active .day-badge {
+      background: var(--accent-blue);
+      color: #0F172A;
+      font-weight: 700;
+    }
+
+    .nav-tag {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--accent-green);
+      font-weight: 700;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 32px 40px;
+    }
+
+    .section-view {
+      display: none;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .section-view.active {
+      display: block;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header */
+    .header-box {
+      margin-bottom: 28px;
+    }
+
+    .header-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .badge-blue { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); }
+    .badge-purple { background: rgba(167, 139, 250, 0.15); color: var(--accent-purple); }
+    .badge-amber { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); }
+    .badge-green { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); }
+
+    .header-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+
+    .header-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+
+    /* Key Concept Banner */
+    .concept-card {
+      background: linear-gradient(145deg, #1E293B, #0F172A);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent-blue);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .concept-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .concept-body {
+      font-size: 14px;
+      color: #CBD5E1;
+      line-height: 1.6;
+    }
+
+    .concept-body code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(0,0,0,0.3);
+      color: var(--accent-amber);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    /* Task Groups */
+    .group-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .level-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .level-facil { background: rgba(52, 211, 153, 0.2); color: var(--accent-green); }
+    .level-medio { background: rgba(251, 191, 36, 0.2); color: var(--accent-amber); }
+    .level-dificil { background: rgba(251, 113, 133, 0.2); color: var(--accent-rose); }
+
+    /* Exercise Cards */
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.2s;
+    }
+
+    .card:hover {
+      border-color: #475569;
+    }
+
+    .card.completed {
+      border-color: rgba(52, 211, 153, 0.4);
+      background-color: rgba(30, 41, 59, 0.8);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .custom-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border: 2px solid #64748B;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      margin-top: 2px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .custom-checkbox:checked {
+      background-color: var(--accent-green);
+      border-color: var(--accent-green);
+    }
+
+    .custom-checkbox:checked::after {
+      content: '✔';
+      font-size: 13px;
+      color: #0F172A;
+      font-weight: 800;
+    }
+
+    .card-info {
+      flex: 1;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .card.completed .card-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .card-desc {
+      font-size: 14px;
+      color: #94A3B8;
+      margin-bottom: 14px;
+    }
+
+    .card-desc strong {
+      color: #E2E8F0;
+    }
+
+    /* Code Snippets */
+    .code-box {
+      background-color: var(--code-bg);
+      border: 1px solid #1E293B;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #E2E8F0;
+      overflow-x: auto;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .code-box .kw { color: #F472B6; } /* keyword */
+    .code-box .fn { color: #60A5FA; } /* function */
+    .code-box .str { color: #34D399; } /* string */
+    .code-box .cm { color: #64748B; font-style: italic; } /* comment */
+    .code-box .var { color: #FBBF24; } /* variable/prop */
+
+    /* Toggle Answer / Hint */
+    .toggle-solution-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid #334155;
+      color: var(--accent-blue);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-solution-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .solution-content {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent-green);
+      font-size: 13px;
+      color: #CBD5E1;
+    }
+
+    .solution-content.active {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    /* Quiz Section */
+    .quiz-card {
+      background: #192231;
+      border: 1px solid #2A374A;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+
+    .quiz-question {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: #F1F5F9;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .quiz-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: #CBD5E1;
+      font-family: inherit;
+      font-size: 13.5px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quiz-btn:hover:not(.disabled) {
+      background: var(--bg-card-hover);
+      border-color: #64748B;
+    }
+
+    .quiz-btn.correct {
+      background: rgba(52, 211, 153, 0.15) !important;
+      border-color: var(--accent-green) !important;
+      color: var(--accent-green) !important;
+      font-weight: 600;
+    }
+
+    .quiz-btn.incorrect {
+      background: rgba(251, 113, 133, 0.15) !important;
+      border-color: var(--accent-rose) !important;
+      color: var(--accent-rose) !important;
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 12px;
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      line-height: 1.5;
+    }
+
+    .quiz-feedback.show-correct {
+      display: block;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: #A7F3D0;
+    }
+
+    .quiz-feedback.show-incorrect {
+      display: block;
+      background: rgba(251, 113, 133, 0.1);
+      border: 1px solid rgba(251, 113, 133, 0.3);
+      color: #FECDD3;
+    }
+
+    /* Projects Page Style */
+    .project-hero {
+      background: linear-gradient(135deg, #1E293B, #0F172A);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .badge-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--accent-blue);
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      color: #0F172A;
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-body {
+      flex: 1;
+    }
+
+    .step-body h4 {
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .step-body p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    /* Theoretical Cards */
+    .theory-box {
+      background: #192231;
+      border-left: 4px solid var(--accent-purple);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .theory-box h4 {
+      font-size: 15px;
+      color: var(--accent-purple);
+      margin-bottom: 8px;
+    }
+
+    .theory-box p {
+      font-size: 13.5px;
+      color: #CBD5E1;
+      margin-bottom: 8px;
+    }
+
+    .theory-answer {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #A7F3D0;
+      border-left: 2px solid var(--accent-green);
+    }
+
+    /* Reset button */
+    .reset-btn {
+      margin-top: 14px;
+      background: transparent;
+      border: 1px dashed #475569;
+      color: #94A3B8;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .reset-btn:hover {
+      color: var(--accent-rose);
+      border-color: var(--accent-rose);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">RN</div>
+      <div class="brand-text">
+        <h2>Revisão Prova</h2>
+        <p>Dev Mobile (30/11)</p>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div class="progress-info">
+        <span>Progresso Geral</span>
+        <span id="overallPercentage">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="overallProgressBar"></div>
+      </div>
+      <button class="reset-btn" onclick="resetAllProgress()">↺ Zerar checklist</button>
+    </div>
+
+    <ul class="nav-links">
+      <li class="nav-item active" data-target="dia1">
+        <button onclick="switchTab('dia1')">
+          <span class="day-badge">D1</span>
+          <span>Fundamentos & Estado</span>
+          <span class="nav-tag" id="count-dia1">0/6</span>
+        </button>
+      </li>
+      <li class="nav-item" data-target="dia2">
+        <button onclick="switchTab('dia2')">
+          <span class="day-badge">D2</span>
+          <span>Navegação & Params</span>
+          <span class="nav-tag" id="count-dia2">0/6</span>
+        </button>
+      </li>
+      <li class="nav-item" data-target="dia3">
+        <button onclick="switchTab('dia3')">
+          <span class="day-badge">D3</span>
+          <span>Listas & Atualização</span>
+          <span class="nav-tag" id="count-dia3">0/6</span>
+        </button>
+      </li>
+      <li class="nav-item" data-target="dia4">
+        <button onclick="switchTab('dia4')">
+          <span class="day-badge">D4</span>
+          <span>API REST & Backend</span>
+          <span class="nav-tag" id="count-dia4">0/6</span>
+        </button>
+      </li>
+      <li class="nav-item" data-target="projetos">
+        <button onclick="switchTab('projetos')">
+          <span class="day-badge">PRO</span>
+          <span>Projetos 3 Telas</span>
+          <span class="nav-tag" id="count-projetos">0/4</span>
+        </button>
+      </li>
+      <li class="nav-item" data-target="dia6">
+        <button onclick="switchTab('dia6')">
+          <span class="day-badge">REV</span>
+          <span>Simulado & Teoria</span>
+          <span class="nav-tag" id="count-dia6">0/8</span>
+        </button>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="main-content">
+
+    <!-- ========================================== -->
+    <!-- DIA 1: FUNDAMENTOS, FLEXBOX & ESTADO       -->
+    <!-- ========================================== -->
+    <div id="dia1" class="section-view active">
+      <div class="header-box">
+        <span class="header-badge badge-blue">Dia 1 • Fundamentos & Mental Model</span>
+        <h1 class="header-title">JSX, Flexbox, Inputs e o poder do useState</h1>
+        <p class="header-desc">Domine a atualização visual e entenda de uma vez por todas por que uma variável comum não redesenha a tela.</p>
+      </div>
+
+      <div class="concept-card">
+        <div class="concept-title">💡 A Grande Regra de Ouro do React Native</div>
+        <div class="concept-body">
+          No JavaScript clássico alteramos o DOM diretamente. No React Native isso <strong>não existe</strong>.
+          A tela é um reflexo direto do <code>Estado</code>. Se você quer que algo mude na tela (um texto, uma cor, o clique de um botão), você <strong>obrigatoriamente</strong> precisa alterar um <code>useState</code>.
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 1 (FÁCIL) -->
+      <div class="card" id="card-ex1-1">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex1-1')">
+          <div class="card-info">
+            <span class="level-tag level-facil">Nível Fácil</span>
+            <h3 class="card-title">1.1 Contador Simples com useState</h3>
+            <p class="card-desc">Crie um componente com um número centralizado na tela e dois botões: <strong>"+1"</strong> e <strong>"-1"</strong>. Ao clicar, o número na tela deve atualizar imediatamente.</p>
+            <div class="code-box">
+<span class="kw">import</span> React, { <span class="fn">useState</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+<span class="kw">import</span> { View, Text, Button, StyleSheet } <span class="kw">from</span> <span class="str">'react-native'</span>;
+
+<span class="kw">export default function</span> <span class="fn">Contador</span>() {
+  <span class="kw">const</span> [contador, setContador] = <span class="fn">useState</span>(0);
+
+  <span class="kw">return</span> (
+    &lt;View style={styles.container}&gt;
+      &lt;Text style={styles.numero}&gt;{contador}&lt;/Text&gt;
+      &lt;Button title=<span class="str">"+1"</span> onPress={() =&gt; <span class="fn">setContador</span>(contador + 1)} /&gt;
+      &lt;Button title=<span class="str">"-1"</span> onPress={() =&gt; <span class="fn">setContador</span>(contador - 1)} /&gt;
+    &lt;/View&gt;
+  );
+}</div>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-1-1')">Exibir Explicação & Pontos de Atenção</button>
+            <div id="sol-1-1" class="solution-content">
+              <strong>Por que funciona:</strong> <code>contador</code> guarda o valor e <code>setContador</code> avisa o motor do React Native: <em>"Ei, redesenhe a tela com o novo valor!"</em>. Nunca faça <code>contador = contador + 1</code>, isso quebra a reatividade.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 2 (MÉDIO) -->
+      <div class="card" id="card-ex1-2">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex1-2')">
+          <div class="card-info">
+            <span class="level-tag level-medio">Nível Médio</span>
+            <h3 class="card-title">1.2 Input de Texto Controlado (TextInput)</h3>
+            <p class="card-desc">Crie uma tela de boas-vindas com um <code>TextInput</code> onde o usuário digita seu nome. Conforme ele digita, deve aparecer embaixo: <em>"Bem-vindo, [Nome Digitado]!"</em>.</p>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-1-2')">Ver Código e Dica</button>
+            <div id="sol-1-2" class="solution-content">
+              <div class="code-box">
+<span class="kw">const</span> [nome, setNome] = <span class="fn">useState</span>(<span class="str">''</span>);
+
+&lt;TextInput 
+  placeholder=<span class="str">"Digite seu nome"</span>
+  value={nome}
+  onChangeText={(texto) =&gt; <span class="fn">setNome</span>(texto)}
+/&gt;
+&lt;Text&gt;{nome ? <span class="str">`Bem-vindo, ${nome}!`</span> : <span class="str">'Digite seu nome acima'</span>}&lt;/Text&gt;</div>
+              <strong>Ponto de Prova:</strong> No React Native usamos <code>onChangeText</code> (que já passa a string direto), e não <code>onChange(e.target.value)</code> da web!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 3 (DIFÍCIL) -->
+      <div class="card" id="card-ex1-3">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex1-3')">
+          <div class="card-info">
+            <span class="level-tag level-dificil">Nível Difícil</span>
+            <h3 class="card-title">1.3 Layout Spotify/Finanças com Flexbox</h3>
+            <p class="card-desc">Construa um Card estilo o <code>MusicBox</code> do professor: uma imagem à esquerda e dois textos à direita (Título e Subtítulo), alinhados horizontalmente com <code>flexDirection: 'row'</code> e espaço entre eles.</p>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-1-3')">Ver Código de Estilo</button>
+            <div id="sol-1-3" class="solution-content">
+              <div class="code-box">
+card: {
+  flexDirection: <span class="str">'row'</span>,       <span class="cm">// Coloca imagem e textos lado a lado</span>
+  alignItems: <span class="str">'center'</span>,          <span class="cm">// Centraliza verticalmente</span>
+  backgroundColor: <span class="str">'#252525'</span>,
+  borderRadius: 8,
+  padding: 10,
+  marginVertical: 6,
+},
+infoBox: {
+  flex: 1,                      <span class="cm">// Ocupa todo o resto da largura</span>
+  marginLeft: 12,
+}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIZ DIA 1 -->
+      <h3 class="group-title" style="margin-top: 32px;">🧠 Fixação de Prova (Múltipla Escolha)</h3>
+      
+      <div class="quiz-card" id="quiz-d1-q1">
+        <p class="quiz-question">1. Se uma variável comum <code>let total = 0;</code> for incrementada dentro de um <code>onPress</code>, o que acontece com a tela do celular?</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d1-q1', this, false)">A) A tela atualiza instantaneamente.</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d1-q1', this, true)">B) A variável muda de valor na memória, mas a tela NÃO é redesenhada.</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d1-q1', this, false)">C) O aplicativo gera um erro de compilação.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-card" id="quiz-d1-q2">
+        <p class="quiz-question">2. Qual propriedade do Flexbox define o alinhamento no <strong>eixo principal</strong>?</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d1-q2', this, false)">A) alignItems</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d1-q2', this, true)">B) justifyContent</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d1-q2', this, false)">C) alignContent</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-card" id="quiz-d1-q3">
+        <p class="quiz-question">3. Qual a diferença entre <code>export default</code> e <code>export</code> nomeado?</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d1-q3', this, true)">A) O default é único por arquivo e importado sem chaves. O nomeado pode ter vários e exige chaves { }.</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d1-q3', this, false)">B) Não há diferença prática, ambos usam chaves { } na importação.</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d1-q3', this, false)">C) O default só funciona com funções assíncronas.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- DIA 2: NAVEGAÇÃO & PARÂMETROS              -->
+    <!-- ========================================== -->
+    <div id="dia2" class="section-view">
+      <div class="header-box">
+        <span class="header-badge badge-purple">Dia 2 • Navegação Completa</span>
+        <h1 class="header-title">Stack, Tabs e Troca de Parâmetros</h1>
+        <p class="header-desc">Aprenda a fazer telas conversarem entre si: enviando dados com <code>navigation.navigate</code> e recebendo com <code>route.params</code>.</p>
+      </div>
+
+      <div class="concept-card">
+        <div class="concept-title">🗺️ O Mapa Mental da Navegação</div>
+        <div class="concept-body">
+          Imagine que a <strong>Stack</strong> é uma pilha de pratos: quando você chama <code>navigate('TelaB')</code>, você coloca a Tela B por cima. Quando aperta voltar ou chama <code>goBack()</code>, retira o prato de cima e a Tela A volta a aparecer.
+          Para passar a "encomenda":
+          <br>• Enviar: <code>navigation.navigate('Detalhes', { id: 10, nome: 'Pizza' })</code>
+          <br>• Abrir a encomenda na outra tela: <code>const { id, nome } = route.params;</code>
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 2.1 (FÁCIL) -->
+      <div class="card" id="card-ex2-1">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex2-1')">
+          <div class="card-info">
+            <span class="level-tag level-facil">Nível Fácil</span>
+            <h3 class="card-title">2.1 Configurando o Native Stack do Zero</h3>
+            <p class="card-desc">Crie um arquivo <code>AppStack.js</code> que configure duas telas: <code>Home</code> e <code>Detalhes</code> com <code>createNativeStackNavigator</code>.</p>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-2-1')">Ver Estrutura Padrão</button>
+            <div id="sol-2-1" class="solution-content">
+              <div class="code-box">
+<span class="kw">import</span> { createNativeStackNavigator } <span class="kw">from</span> <span class="str">'@react-navigation/native-stack'</span>;
+<span class="kw">import</span> Home <span class="kw">from</span> <span class="str">'../screens/Home'</span>;
+<span class="kw">import</span> Detalhes <span class="kw">from</span> <span class="str">'../screens/Detalhes'</span>;
+
+<span class="kw">const</span> Stack = <span class="fn">createNativeStackNavigator</span>();
+
+<span class="kw">export default function</span> <span class="fn">AppStack</span>() {
+  <span class="kw">return</span> (
+    &lt;Stack.Navigator&gt;
+      &lt;Stack.Screen name=<span class="str">"Home"</span> component={Home} options={{ title: <span class="str">'Início'</span> }} /&gt;
+      &lt;Stack.Screen name=<span class="str">"Detalhes"</span> component={Detalhes} /&gt;
+    &lt;/Stack.Navigator&gt;
+  );
+}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 2.2 (MÉDIO) -->
+      <div class="card" id="card-ex2-2">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex2-2')">
+          <div class="card-info">
+            <span class="level-tag level-medio">Nível Médio</span>
+            <h3 class="card-title">2.2 Passagem e Leitura de Parâmetros (Produto / Música)</h3>
+            <p class="card-desc">Na tela <code>Home</code>, ao clicar em um card de música, chame a tela <code>Player</code> enviando <code>{ titulo: "Bohemian Rhapsody", artista: "Queen" }</code>. Na tela <code>Player</code>, mostre esses dados e crie um botão de voltar.</p>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-2-2')">Ver Código de Envio e Recebimento</button>
+            <div id="sol-2-2" class="solution-content">
+              <div class="code-box">
+<span class="cm">// Na tela Player.js:</span>
+<span class="kw">export default function</span> <span class="fn">Player</span>({ route, navigation }) {
+  <span class="cm">// Desestruturação direta do route.params</span>
+  <span class="kw">const</span> { titulo, artista } = route.params;
+
+  <span class="kw">return</span> (
+    &lt;View style={styles.container}&gt;
+      &lt;Text style={styles.titulo}&gt;{titulo}&lt;/Text&gt;
+      &lt;Text style={styles.artista}&gt;{artista}&lt;/Text&gt;
+      &lt;Button title=<span class="str">"Voltar"</span> onPress={() =&gt; navigation.<span class="fn">goBack</span>()} /&gt;
+    &lt;/View&gt;
+  );
+}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 2.3 (DIFÍCIL) -->
+      <div class="card" id="card-ex2-3">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex2-3')">
+          <div class="card-info">
+            <span class="level-tag level-dificil">Nível Difícil</span>
+            <h3 class="card-title">2.3 Aninhando Stack dentro de Tabs (Padrão SpotFive)</h3>
+            <p class="card-desc">Crie um BottomTabNavigator onde a primeira aba ("Home") não é uma tela simples, mas sim o seu <code>AppStack</code>. A segunda aba é a tela de "Perfil".</p>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-2-3')">Ver Arquitetura de Rotas</button>
+            <div id="sol-2-3" class="solution-content">
+              <div class="code-box">
+<span class="kw">const</span> Tab = <span class="fn">createBottomTabNavigator</span>();
+
+<span class="kw">export default function</span> <span class="fn">MainTabs</span>() {
+  <span class="kw">return</span> (
+    &lt;Tab.Navigator screenOptions={{ headerShown: <span class="kw">false</span> }}&gt;
+      <span class="cm">{/* A aba Home carrega toda a pilha de navegação! */}</span>
+      &lt;Tab.Screen name=<span class="str">"HomeStack"</span> component={AppStack} options={{ title: <span class="str">'Home'</span> }} /&gt;
+      &lt;Tab.Screen name=<span class="str">"Perfil"</span> component={Perfil} /&gt;
+    &lt;/Tab.Navigator&gt;
+  );
+}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIZ DIA 2 -->
+      <h3 class="group-title" style="margin-top: 32px;">🧠 Fixação de Prova (Múltipla Escolha)</h3>
+      
+      <div class="quiz-card" id="quiz-d2-q1">
+        <p class="quiz-question">1. Se você navegar para a tela "Perfil" com <code>navigation.navigate('Perfil', { user: 'Carlos' })</code>, como a tela "Perfil" acessa o nome?</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d2-q1', this, false)">A) <code>navigation.params.user</code></button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d2-q1', this, true)">B) <code>route.params.user</code></button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d2-q1', this, false)">C) <code>useRoute('Carlos')</code></button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-card" id="quiz-d2-q2">
+        <p class="quiz-question">2. Para voltar à tela anterior na pilha de navegação, qual comando deve ser chamado?</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d2-q2', this, true)">A) <code>navigation.goBack()</code></button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d2-q2', this, false)">B) <code>navigation.popAll()</code></button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d2-q2', this, false)">C) <code>navigation.backScreen()</code></button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-card" id="quiz-d2-q3">
+        <p class="quiz-question">3. Onde o <code>NavigationContainer</code> deve ficar posicionado no projeto?</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d2-q3', this, true)">A) Na raiz do app (App.js ou Start.js), abraçando todos os navegadores.</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d2-q3', this, false)">B) Dentro de cada tela individualmente.</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d2-q3', this, false)">C) Apenas dentro dos componentes de Botão.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- DIA 3: LISTAS & ATUALIZAÇÃO REATIVA        -->
+    <!-- ========================================== -->
+    <div id="dia3" class="section-view">
+      <div class="header-box">
+        <span class="header-badge badge-amber">Dia 3 • Listas & O Mistério da Atualização</span>
+        <h1 class="header-title">FlatList, useEffect e o useFocusEffect</h1>
+        <p class="header-desc">Descubra por que listas não atualizam sozinhas quando você volta de tela e como usar <code>useFocusEffect</code> para resolver isso de vez.</p>
+      </div>
+
+      <div class="concept-card">
+        <div class="concept-title">⚡ Por que a tela não atualizou ao voltar?</div>
+        <div class="concept-body">
+          Quando você vai da <strong>Tela de Lista</strong> para a <strong>Tela de Cadastro</strong> e clica em Voltar, a tela de lista <strong>nunca foi descarregada da memória</strong>!
+          <br>• O <code>useEffect(() => {}, [])</code> só roda quando o componente "nasce" (mount). Como ele já estava na memória, não roda de novo.
+          <br>• O <code>useFocusEffect</code> roda <strong>toda vez que a tela ganha foco</strong>! É ele que você usa para recarregar a lista ao voltar de um cadastro.
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 3.1 (FÁCIL) -->
+      <div class="card" id="card-ex3-1">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex3-1')">
+          <div class="card-info">
+            <span class="level-tag level-facil">Nível Fácil</span>
+            <h3 class="card-title">3.1 FlatList Básica sem Travar</h3>
+            <p class="card-desc">Crie uma <code>FlatList</code> que renderize uma lista estática de 4 produtos com <code>id</code>, <code>nome</code> e <code>preco</code>. Certifique-se de configurar <code>data</code>, <code>renderItem</code> e <code>keyExtractor</code>.</p>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-3-1')">Ver Código da FlatList</button>
+            <div id="sol-3-1" class="solution-content">
+              <div class="code-box">
+&lt;FlatList
+  data={produtos}
+  keyExtractor={(item) =&gt; item.id.toString()}
+  renderItem={({ item }) =&gt; (
+    &lt;View style={styles.item}&gt;
+      &lt;Text style={styles.itemNome}&gt;{item.nome}&lt;/Text&gt;
+      &lt;Text style={styles.itemPreco}&gt;R$ {item.preco}&lt;/Text&gt;
+    &lt;/View&gt;
+  )}
+/&gt;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 3.2 (MÉDIO) -->
+      <div class="card" id="card-ex3-2">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex3-2')">
+          <div class="card-info">
+            <span class="level-tag level-medio">Nível Médio</span>
+            <h3 class="card-title">3.2 Exclusão Reativa de Item (Filter)</h3>
+            <p class="card-desc">Adicione um botão "Remover" em cada item da FlatList. Ao clicar, o item correspondente deve sumir imediatamente da tela usando <code>filter</code> no estado.</p>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-3-2')">Ver Função de Remoção</button>
+            <div id="sol-3-2" class="solution-content">
+              <div class="code-box">
+<span class="kw">function</span> <span class="fn">removerItem</span>(idParaRemover) {
+  <span class="cm">// Mantém na lista apenas quem tem id diferente do removido</span>
+  <span class="fn">setProdutos</span>(produtosAtuais =&gt; produtosAtuais.<span class="fn">filter</span>(item =&gt; item.id !== idParaRemover));
+}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 3.3 (DIFÍCIL) -->
+      <div class="card" id="card-ex3-3">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex3-3')">
+          <div class="card-info">
+            <span class="level-tag level-dificil">Nível Difícil</span>
+            <h3 class="card-title">3.3 useFocusEffect na Prática (Código de Prova)</h3>
+            <p class="card-desc">Escreva a estrutura exata do <code>useFocusEffect</code> combinada com <code>useCallback</code> para executar a função <code>carregarDados()</code> sempre que a tela for exibida.</p>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-3-3')">Ver Estrutura do useFocusEffect</button>
+            <div id="sol-3-3" class="solution-content">
+              <div class="code-box">
+<span class="kw">import</span> { useFocusEffect } <span class="kw">from</span> <span class="str">'@react-navigation/native'</span>;
+<span class="kw">import</span> { useCallback } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="fn">useFocusEffect</span>(
+  <span class="fn">useCallback</span>(() =&gt; {
+    <span class="fn">carregarDados</span>(); <span class="cm">// Roda ao abrir a tela E sempre que voltar de outra tela!</span>
+  }, [])
+);</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIZ DIA 3 -->
+      <h3 class="group-title" style="margin-top: 32px;">🧠 Fixação de Prova (Múltipla Escolha)</h3>
+      
+      <div class="quiz-card" id="quiz-d3-q1">
+        <p class="quiz-question">1. Por que usamos <code>FlatList</code> em vez de <code>ScrollView</code> para listas longas?</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d3-q1', this, true)">A) Porque a FlatList renderiza apenas os itens visíveis na tela (economia de memória).</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d3-q1', this, false)">B) Porque a FlatList só funciona com números inteiros.</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d3-q1', this, false)">C) Porque ScrollView não aceita botões clicáveis.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-card" id="quiz-d3-q2">
+        <p class="quiz-question">2. O que acontece se chamarmos uma API dentro de um <code>useEffect</code> sem passar o array de dependências <code>[]</code>?</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d3-q2', this, true)">A) O efeito roda em loop infinito a cada renderização, podendo travar o app.</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d3-q2', this, false)">B) A API nunca será chamada.</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d3-q2', this, false)">C) Os dados serão duplicados no banco de dados.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-card" id="quiz-d3-q3">
+        <p class="quiz-question">3. Qual hook do React Navigation é essencial para atualizar uma listagem ao voltar de uma tela de cadastro?</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d3-q3', this, true)">A) useFocusEffect</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d3-q3', this, false)">B) useNavigationState</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d3-q3', this, false)">C) useMemo</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- DIA 4: CONEXÃO COM BACKEND (API REST)      -->
+    <!-- ========================================== -->
+    <div id="dia4" class="section-view">
+      <div class="header-box">
+        <span class="header-badge badge-green">Dia 4 • Conexão com Backend (API REST)</span>
+        <h1 class="header-title">Fetch, Métodos HTTP, Loading e Tratamento de Erros</h1>
+        <p class="header-desc">O conteúdo mais recente ensinado em sala: consumindo APIs com <code>GET</code>, <code>POST</code> e <code>DELETE</code>.</p>
+      </div>
+
+      <div class="concept-card">
+        <div class="concept-title">🌐 As 4 Operações Essenciais de API (CRUD)</div>
+        <div class="concept-body">
+          • <strong>GET:</strong> Buscar dados do servidor (padrão do <code>fetch(url)</code>).<br>
+          • <strong>POST:</strong> Criar novo registro (passa <code>method: 'POST'</code>, <code>headers: { 'Content-Type': 'application/json' }</code> e <code>body: JSON.stringify(objeto)</code>).<br>
+          • <strong>DELETE:</strong> Remover registro passando o id na URL (ex: <code>fetch(`${url}/${id}`, { method: 'DELETE' })</code>).<br>
+          • <strong>ActivityIndicator:</strong> Componente nativo do React Native para exibir o "spinner" de carregamento.
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 4.1 (FÁCIL) -->
+      <div class="card" id="card-ex4-1">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex4-1')">
+          <div class="card-info">
+            <span class="level-tag level-facil">Nível Fácil</span>
+            <h3 class="card-title">4.1 Buscar Dados com GET e Loading</h3>
+            <p class="card-desc">Crie a função <code>carregarTarefas()</code> que liga o <code>setCarregando(true)</code>, faz o <code>fetch</code>, guarda a resposta no estado e desliga o loading no bloco <code>finally</code>.</p>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-4-1')">Ver Código do GET</button>
+            <div id="sol-4-1" class="solution-content">
+              <div class="code-box">
+<span class="kw">async function</span> <span class="fn">carregarTarefas</span>() {
+  <span class="kw">try</span> {
+    <span class="fn">setCarregando</span>(<span class="kw">true</span>);
+    <span class="kw">const</span> resposta = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'http://apiwp.smartcortex.ai:8888/tarefas'</span>);
+    <span class="kw">const</span> dados = <span class="kw">await</span> resposta.<span class="fn">json</span>();
+    <span class="fn">setTarefas</span>(dados);
+  } <span class="kw">catch</span> (erro) {
+    Alert.<span class="fn">alert</span>(<span class="str">'Erro'</span>, <span class="str">'Não foi possível carregar as tarefas'</span>);
+  } <span class="kw">finally</span> {
+    <span class="fn">setCarregando</span>(<span class="kw">false</span>);
+  }
+}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 4.2 (MÉDIO) -->
+      <div class="card" id="card-ex4-2">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex4-2')">
+          <div class="card-info">
+            <span class="level-tag level-medio">Nível Médio</span>
+            <h3 class="card-title">4.2 Cadastrar Novo Registro com POST</h3>
+            <p class="card-desc">Crie a tela de cadastro que envia um título e descrição para a API. Ao receber status de sucesso, emita um <code>Alert.alert</code> e faça <code>navigation.goBack()</code>.</p>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-4-2')">Ver Código do POST</button>
+            <div id="sol-4-2" class="solution-content">
+              <div class="code-box">
+<span class="kw">const</span> resposta = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'http://apiwp.smartcortex.ai:8888/tarefas'</span>, {
+  method: <span class="str">'POST'</span>,
+  headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+  body: JSON.<span class="fn">stringify</span>({
+    titulo: titulo,
+    descricao: descricao,
+    concluida: <span class="kw">false</span>
+  })
+});
+
+<span class="kw">if</span> (resposta.ok) {
+  Alert.<span class="fn">alert</span>(<span class="str">'Sucesso'</span>, <span class="str">'Cadastrado!'</span>, [
+    { text: <span class="str">'OK'</span>, onPress: () =&gt; navigation.<span class="fn">goBack</span>() }
+  ]);
+}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXERCÍCIO 4.3 (DIFÍCIL) -->
+      <div class="card" id="card-ex4-3">
+        <div class="card-top">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('ex4-3')">
+          <div class="card-info">
+            <span class="level-tag level-dificil">Nível Difícil</span>
+            <h3 class="card-title">4.3 Excluir com DELETE e Alerta de Confirmação</h3>
+            <p class="card-desc">Antes de chamar o endpoint de DELETE, abra um <code>Alert.alert</code> com dois botões: <em>"Cancelar"</em> e <em>"Excluir"</em>. Se o usuário confirmar, faça a requisição e atualize o estado local.</p>
+            <button class="toggle-solution-btn" onclick="toggleSolution('sol-4-3')">Ver Código com Confirmação</button>
+            <div id="sol-4-3" class="solution-content">
+              <div class="code-box">
+Alert.<span class="fn">alert</span>(<span class="str">'Excluir'</span>, <span class="str">'Tem certeza?'</span>, [
+  { text: <span class="str">'Cancelar'</span>, style: <span class="str">'cancel'</span> },
+  { 
+    text: <span class="str">'Excluir'</span>, 
+    style: <span class="str">'destructive'</span>,
+    onPress: <span class="kw">async</span> () =&gt; {
+      <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`http://.../tarefas/${id}`</span>, { method: <span class="str">'DELETE'</span> });
+      <span class="fn">setTarefas</span>(atuais =&gt; atuais.<span class="fn">filter</span>(t =&gt; t.id !== id));
+    }
+  }
+]);</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIZ DIA 4 -->
+      <h3 class="group-title" style="margin-top: 32px;">🧠 Fixação de Prova (Múltipla Escolha)</h3>
+      
+      <div class="quiz-card" id="quiz-d4-q1">
+        <p class="quiz-question">1. Qual cabeçalho (Header) é obrigatório ao enviar dados em JSON via POST ou PUT?</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d4-q1', this, false)">A) <code>'Accept': 'text/html'</code></button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d4-q1', this, true)">B) <code>'Content-Type': 'application/json'</code></button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d4-q1', this, false)">C) <code>'Auth': 'bearer'</code></button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-card" id="quiz-d4-q2">
+        <p class="quiz-question">2. Por que usamos <code>JSON.stringify()</code> no corpo (body) de uma requisição POST?</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d4-q2', this, true)">A) Porque o protocolo HTTP transfere texto, então convertemos o objeto JS em string JSON.</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d4-q2', this, false)">B) Para criptografar a senha do usuário.</button>
+          <button class="quiz-btn" onclick="checkQuiz('quiz-d4-q2', this, false)">C) Para salvar os dados automaticamente no celular.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA: PROJETOS 3 TELAS                      -->
+    <!-- ========================================== -->
+    <div id="projetos" class="section-view">
+      <div class="header-box">
+        <span class="header-badge badge-blue">Projetos Práticos • 3 Telas Se Conversando</span>
+        <h1 class="header-title">O Roteiro Completo para Construir do Zero</h1>
+        <p class="header-desc">Escolha um dos 2 modelos abaixo. Ambos cobrem 100% dos conteúdos solicitados para a prova.</p>
+      </div>
+
+      <!-- PROJETO SPOTFIVE -->
+      <div class="project-hero">
+        <span class="badge-pill">Opção 1 • Baseado na Pasta SpotFive-V2</span>
+        <h2>App SpotFive Interativo (Música & Catálogo)</h2>
+        <p style="color: #94A3B8; margin-top: 6px; margin-bottom: 20px;">Três telas conectadas que usam Stack + Tabs, passagem de músicas para o Player e cadastro de novas faixas.</p>
+
+        <div class="step-item card" id="card-pro-step1">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('pro-step1')">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Tela 1: Catálogo / Home</h4>
+            <p>Lista as músicas cadastradas usando <code>FlatList</code>. Cada música mostra Capa, Nome e Artista. Tem botão flutuante ou no topo: <em>"+ Nova Música"</em>.</p>
+            <div class="card-desc"><strong>Ação ao clicar na música:</strong> <code>navigation.navigate('Playing', { musica: item })</code></div>
+          </div>
+        </div>
+
+        <div class="step-item card" id="card-pro-step2">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('pro-step2')">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>Tela 2: Tocando Agora (Player)</h4>
+            <p>Recebe os dados via <code>const { musica } = route.params;</code>. Exibe o nome da música em destaque, artista e um botão de Play/Pause controlado por <code>useState</code>.</p>
+            <div class="card-desc"><strong>Ação de voltar:</strong> Botão com <code>navigation.goBack()</code></div>
+          </div>
+        </div>
+
+        <div class="step-item card" id="card-pro-step3">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('pro-step3')">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h4>Tela 3: Cadastrar Nova Faixa / Playlist</h4>
+            <p>Formulário com <code>TextInput</code> para Título e Artista. Ao clicar em <em>"Adicionar"</em>, salva na lista (ou na API) e volta para a Home. A Home recarrega usando <code>useFocusEffect</code>.</p>
+          </div>
+        </div>
+
+        <div class="step-item card" id="card-pro-step4">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('pro-step4')">
+          <div class="step-number">4</div>
+          <div class="step-body">
+            <h4>Testes e Validação Completa</h4>
+            <p>Testar no celular/emulador: transitar entre as 3 telas, passar músicas diferentes e verificar se a música cadastrada aparece na Home imediatamente ao voltar.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJETO MERCADO / ESTOQUE -->
+      <div class="project-hero">
+        <span class="badge-pill" style="background: rgba(52, 211, 153, 0.2); color: var(--accent-green);">Opção 2 • App de Mercado / Estoque / Nubank</span>
+        <h2>App MercadoExpress (Estoque & Vendas)</h2>
+        <p style="color: #94A3B8; margin-top: 6px; margin-bottom: 20px;">Ideal para demonstrar controle de estado, atualização imediata de valores e formulários de produtos.</p>
+
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Tela 1: Lista de Produtos</h4>
+            <p>Lista itens em estoque com Preço e Quantidade. Exibe card no topo com o <strong>Valor Total em Estoque</strong> (calculado automaticamente com base nos itens).</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>Tela 2: Detalhes do Produto</h4>
+            <p>Recebe o produto clicado, permite alterar a quantidade (botões + e -) e remover o item do estoque com confirmação de <code>Alert.alert</code>.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h4>Tela 3: Cadastrar Novo Produto</h4>
+            <p>Campos: Nome do Produto, Preço Unitário e Quantidade Inicial. Validação simples para não permitir salvar com campos vazios.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- DIA 6: SIMULADO TEÓRICO & BUGS DE PROVA    -->
+    <!-- ========================================== -->
+    <div id="dia6" class="section-view">
+      <div class="header-box">
+        <span class="header-badge badge-rose">Simulado & Revisão • Padrão de Prova</span>
+        <h1 class="header-title">Perguntas Teóricas e Como Desarmar Pegadinhas</h1>
+        <p class="header-desc">Perguntas dissertativas reais baseadas no estilo das provas e nos slides da matéria.</p>
+      </div>
+
+      <div class="theory-box card" id="card-rev-t1">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('rev-t1')">
+          <div style="flex: 1;">
+            <h4>1. O que é JSX e qual sua principal vantagem?</h4>
+            <div class="theory-answer">
+              <strong>Resposta esperada:</strong> JSX é uma extensão de sintaxe para JavaScript que permite escrever a estrutura da interface do usuário de forma declarativa e semelhante ao HTML. Sua principal vantagem é a facilidade de leitura, organização visual dos componentes e melhor manutenção do código.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="theory-box card" id="card-rev-t2">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('rev-t2')">
+          <div style="flex: 1;">
+            <h4>2. Qual é a diferença prática entre justifyContent e alignItems no StyleSheet?</h4>
+            <div class="theory-answer">
+              <strong>Resposta esperada:</strong> O <code>justifyContent</code> alinha os elementos ao longo do <strong>eixo principal</strong> (por padrão vertical no React Native, pois <code>flexDirection</code> default é <code>'column'</code>). Já o <code>alignItems</code> alinha os elementos no <strong>eixo secundário/transversal</strong> (por padrão horizontal).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="theory-box card" id="card-rev-t3">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('rev-t3')">
+          <div style="flex: 1;">
+            <h4>3. O que é Comunicação Direta e Indireta entre componentes?</h4>
+            <div class="theory-answer">
+              <strong>Resposta esperada:</strong><br>
+              • <strong>Direta:</strong> O componente Pai passa dados para o componente Filho através de <code>props</code> convencionais (ex: <code>&lt;Filho nome="Ana" /&gt;</code>).<br>
+              • <strong>Indireta:</strong> O componente Pai passa uma função de callback via props para o Filho. Quando o Filho executa essa função, ele consegue enviar dados de volta para o Pai (ex: <code>&lt;Filho aoSalvar={receberDados} /&gt;</code>).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="theory-box card" id="card-rev-t4">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('rev-t4')">
+          <div style="flex: 1;">
+            <h4>4. Por que usamos StyleSheet.create ao invés de estilos inline puros?</h4>
+            <div class="theory-answer">
+              <strong>Resposta esperada:</strong> Por desempenho e organização. O <code>StyleSheet.create</code> processa e valida os estilos uma única vez, gerando referências numéricas internas (evitando que novos objetos de estilo sejam recriados na memória a cada renderização do componente).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="theory-box card" id="card-rev-t5">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('rev-t5')">
+          <div style="flex: 1;">
+            <h4>5. Como solucionar o problema de uma tela não recarregar dados ao voltar nela?</h4>
+            <div class="theory-answer">
+              <strong>Resposta esperada:</strong> Utilizando o hook <code>useFocusEffect</code> (junto com <code>useCallback</code>) do React Navigation em vez do <code>useEffect</code> com array vazio. O <code>useFocusEffect</code> detecta quando a tela ganha foco (ao ser aberta ou ao voltar de outra tela) e reexecuta a função de busca/atualização.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GUIA DE BUGS COMUNS -->
+      <h3 class="group-title" style="margin-top: 36px; color: var(--accent-rose);">⚠️ 3 Erros Fatais em Prova que Você Deve Evitar</h3>
+
+      <div class="card" id="card-rev-b1">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('rev-b1')">
+          <div style="flex: 1;">
+            <div class="card-title" style="color: var(--accent-rose);">Erro 1: "Cannot read property 'params' of undefined"</div>
+            <p class="card-desc"><strong>Causa:</strong> Você tentou fazer <code>const { id } = route.params</code>, mas a tela foi aberta sem nenhum parâmetro enviado.<br>
+            <strong>Como evitar:</strong> Use valor padrão ou verificação opcional: <code>const { id } = route.params || {};</code></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-rev-b2">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('rev-b2')">
+          <div style="flex: 1;">
+            <div class="card-title" style="color: var(--accent-rose);">Erro 2: Loop Infinito com useState dentro de useEffect</div>
+            <p class="card-desc"><strong>Causa:</strong> Chamar <code>setDados()</code> dentro de um <code>useEffect</code> sem passar o array de dependências <code>[]</code> no final.<br>
+            <strong>Como evitar:</strong> Sempre adicione <code>[]</code> como segundo parâmetro do <code>useEffect</code> se quiser que ele rode só uma vez na montagem.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-rev-b3">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <input type="checkbox" class="custom-checkbox" onchange="toggleTask('rev-b3')">
+          <div style="flex: 1;">
+            <div class="card-title" style="color: var(--accent-rose);">Erro 3: Esquecer do 'await' ou do 'JSON.stringify' no fetch</div>
+            <p class="card-desc"><strong>Causa:</strong> Fazer <code>body: { titulo }</code> direto no fetch faz a API receber <code>[object Object]</code> e dar erro 400 ou 500.<br>
+            <strong>Como evitar:</strong> Sempre use <code>body: JSON.stringify({ titulo })</code> e cabeçalho <code>'Content-Type': 'application/json'</code>.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // Storage Key
+    const STORAGE_KEY = 'rn_review_progress_v1';
+
+    // State
+    let taskState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+    // Switch Tabs
+    function switchTab(tabId) {
+      document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      const targetView = document.getElementById(tabId);
+      if (targetView) targetView.classList.add('active');
+
+      const navBtn = document.querySelector(`.nav-item[data-target="${tabId}"]`);
+      if (navBtn) navBtn.classList.add('active');
+    }
+
+    // Toggle Task Complete
+    function toggleTask(taskId) {
+      taskState[taskId] = !taskState[taskId];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(taskState));
+      updateUI();
+    }
+
+    // Toggle Solution
+    function toggleSolution(solId) {
+      const el = document.getElementById(solId);
+      if (el) el.classList.toggle('active');
+    }
+
+    // Interactive Quiz Handler
+    function checkQuiz(quizId, btn, isCorrect) {
+      const container = document.getElementById(quizId);
+      const buttons = container.querySelectorAll('.quiz-btn');
+      const feedback = container.querySelector('.quiz-feedback');
+
+      buttons.forEach(b => {
+        b.classList.remove('correct', 'incorrect');
+        b.classList.add('disabled');
+      });
+
+      if (isCorrect) {
+        btn.classList.add('correct');
+        feedback.className = 'quiz-feedback show-correct';
+        feedback.innerHTML = '<strong>Correto!</strong> Você dominou este conceito fundamental para a prova.';
+        taskState[quizId] = true;
+      } else {
+        btn.classList.add('incorrect');
+        feedback.className = 'quiz-feedback show-incorrect';
+        feedback.innerHTML = '<strong>Atenção!</strong> Esta resposta não é a correta. Revise o conceito e tente novamente.';
+        taskState[quizId] = false;
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(taskState));
+      updateUI();
+    }
+
+    // Update Progress and Checkbox states
+    function updateUI() {
+      // Set checkboxes
+      document.querySelectorAll('.custom-checkbox').forEach(cb => {
+        const onclickAttr = cb.getAttribute('onchange');
+        if (onclickAttr) {
+          const match = onclickAttr.match(/'([^']+)'/);
+          if (match) {
+            const id = match[1];
+            cb.checked = !!taskState[id];
+            const card = cb.closest('.card');
+            if (card) {
+              if (cb.checked) card.classList.add('completed');
+              else card.classList.remove('completed');
+            }
+          }
+        }
+      });
+
+      // Calculate Day Counts
+      const dayTasks = {
+        'dia1': ['ex1-1', 'ex1-2', 'ex1-3', 'quiz-d1-q1', 'quiz-d1-q2', 'quiz-d1-q3'],
+        'dia2': ['ex2-1', 'ex2-2', 'ex2-3', 'quiz-d2-q1', 'quiz-d2-q2', 'quiz-d2-q3'],
+        'dia3': ['ex3-1', 'ex3-2', 'ex3-3', 'quiz-d3-q1', 'quiz-d3-q2', 'quiz-d3-q3'],
+        'dia4': ['ex4-1', 'ex4-2', 'ex4-3', 'quiz-d4-q1', 'quiz-d4-q2'],
+        'projetos': ['pro-step1', 'pro-step2', 'pro-step3', 'pro-step4'],
+        'dia6': ['rev-t1', 'rev-t2', 'rev-t3', 'rev-t4', 'rev-t5', 'rev-b1', 'rev-b2', 'rev-b3']
+      };
+
+      let totalAll = 0;
+      let completedAll = 0;
+
+      for (const [day, tasks] of Object.entries(dayTasks)) {
+        let completed = tasks.filter(t => taskState[t]).length;
+        let total = tasks.length;
+        totalAll += total;
+        completedAll += completed;
+
+        const countEl = document.getElementById(`count-${day}`);
+        if (countEl) countEl.textContent = `${completed}/${total}`;
+      }
+
+      const percent = totalAll > 0 ? Math.round((completedAll / totalAll) * 100) : 0;
+      const pctEl = document.getElementById('overallPercentage');
+      const barEl = document.getElementById('overallProgressBar');
+      if (pctEl) pctEl.textContent = `${percent}%`;
+      if (barEl) barEl.style.width = `${percent}%`;
+    }
+
+    // Reset Progress
+    function resetAllProgress() {
+      if (confirm('Deseja realmente zerar todo o progresso do checklist?')) {
+        taskState = {};
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      }
+    }
+
+    // Init
+    window.addEventListener('DOMContentLoaded', () => {
+      updateUI();
+    });
+  </script>
+</body>
+</html>
